@@ -1,0 +1,18 @@
+[Unit]
+Description=OpenMower Web UI
+Documentation=https://github.com/ClemensElflein/open_mower_ros
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+WorkingDirectory=/home/ubuntu/open_mower_ros/docker/development
+ExecStart=/bin/bash -c 'docker-compose up -d nginx mosquitto'
+ExecStop=/bin/bash -c 'docker-compose down nginx mosquitto'
+TimeoutStartSec=0
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
