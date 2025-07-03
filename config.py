@@ -25,12 +25,14 @@ REMOTE_CONFIG = {
     "ros_pi_ip": "192.168.1.100",
     "ros_dev_ip": "192.168.1.200",
     
-    # Debug Programme (automatisch erkannt, aber anpassbar)
+    # Debug Programme (nur existierende Binaries)
     "debug_programs": [
         {"name": "mower_logic", "path": "mower_logic/mower_logic"},
         {"name": "mower_comms_v2", "path": "mower_comms_v2/mower_comms_v2"},
         {"name": "mower_map_service", "path": "mower_map/mower_map_service"},
         {"name": "monitoring", "path": "mower_logic/monitoring"},
+        {"name": "mower_comms_v1", "path": "mower_comms_v1/mower_comms_v1"},
+        # open_mower ist ein Launch-Package, kein Binary - nicht als Debug-Ziel
     ]
 }
 
@@ -114,12 +116,15 @@ def detect_project_binaries():
     project_root = get_project_root()
     src_dir = os.path.join(project_root, "src")
     
+    # Packages ohne ausführbare Binaries (nur Launch-Files, Messages, etc.)
+    excluded_packages = ["open_mower", "mower_msgs", "mower_utils"]
+    
     detected_programs = []
     
     if os.path.exists(src_dir):
         for item in os.listdir(src_dir):
             item_path = os.path.join(src_dir, item)
-            if os.path.isdir(item_path) and not item.startswith('.'):
+            if os.path.isdir(item_path) and not item.startswith('.') and item not in excluded_packages:
                 # Prüfe ob es ein ROS-Package ist (CMakeLists.txt + package.xml)
                 if (os.path.exists(os.path.join(item_path, "CMakeLists.txt")) and
                     os.path.exists(os.path.join(item_path, "package.xml"))):
