@@ -38,16 +38,18 @@ DEBUG_PROGRAMS = [
 EXCLUDED_PACKAGES = ["open_mower", "mower_msgs", "mower_utils", "mower_map"]
 
 # ============================================================================
-# DEFAULT CONFIGURATION (fallback when config_local.py is missing)
+# DEFAULT VALUES (can be overridden in config_local.py)
 # ============================================================================
 
 DEFAULT_CONFIG = {
-    # Raspberry Pi Configuration
-    "host": "192.168.1.100",                    # Pi IP address
-    "user": "ubuntu",                            # SSH username
-    "ssh_key": "~/.ssh/id_rsa_openmower",        # SSH key path
-    "ssh_host": "openmower",                     # SSH host from ~/.ssh/config
-    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace path on Pi
+    # Connection details
+    "host": "192.168.1.100",
+    "user": "openmower",
+    "workspace": "/home/openmower/openmower_ros",
+    
+    # SSH settings
+    "ssh_key": "~/.ssh/id_rsa_openmower",
+    "ssh_host": "",  # Optional: use SSH host from ~/.ssh/config
     
     # ROS Configuration
     "ros_master_uri": "http://192.168.1.100:11311",
@@ -59,7 +61,7 @@ DEFAULT_CONFIG = {
 # CONFIGURATION LOADING AND MERGING
 # ============================================================================
 
-def load_config():
+def load_config(verbose=False):
     """
     Loads configuration from config_local.py if available,
     otherwise uses default values.
@@ -70,13 +72,16 @@ def load_config():
         # Try to import local configuration
         from config_local import LOCAL_CONFIG
         config.update(LOCAL_CONFIG)
-        print("✅ Local configuration loaded from config_local.py")
+        if verbose:
+            print("✅ Local configuration loaded from config_local.py")
     except ImportError:
-        print("⚠️  config_local.py not found - using default values")
-        print("   Tip: cp config_local.py.template config_local.py")
+        if verbose:
+            print("⚠️  config_local.py not found - using default values")
+            print("   Tip: cp config_local.py.template config_local.py")
     except Exception as e:
-        print(f"❌ Error loading config_local.py: {e}")
-        print("   Using default values")
+        if verbose:
+            print(f"❌ Error loading config_local.py: {e}")
+            print("   Using default values")
     
     # Add debug programs
     config["debug_programs"] = DEBUG_PROGRAMS
@@ -145,17 +150,29 @@ def get_ssh_command():
         ssh_key = REMOTE_CONFIG.get("ssh_key", "~/.ssh/id_rsa_openmower")
         return f"ssh -i {ssh_key} -o StrictHostKeyChecking=no {REMOTE_CONFIG['user']}@{REMOTE_CONFIG['host']}"
 
+def get_ssh_full_command(extra_args=""):
+    """Creates full SSH command for script usage."""
+    if "ssh_host" in REMOTE_CONFIG and REMOTE_CONFIG["ssh_host"]:
+        # Use SSH host from ~/.ssh/config - already includes user and host
+        return f"ssh {extra_args} {REMOTE_CONFIG['ssh_host']}" if extra_args else f"ssh {REMOTE_CONFIG['ssh_host']}"
+    else:
+        # Direct SSH connection with key
+        ssh_key = REMOTE_CONFIG.get("ssh_key", "~/.ssh/id_rsa_openmower")
+        base_cmd = f"ssh -i {ssh_key} -o StrictHostKeyChecking=no"
+        if extra_args:
+            base_cmd += f" {extra_args}"
+        return f"{base_cmd} {REMOTE_CONFIG['user']}@{REMOTE_CONFIG['host']}"
+
 def get_rsync_command():
     """Creates rsync base command with SSH key."""
     if "ssh_host" in REMOTE_CONFIG and REMOTE_CONFIG["ssh_host"]:
-        # Use SSH host from ~/.ssh/config
-        ssh_cmd = f"ssh {REMOTE_CONFIG['ssh_host']}"
+        # Use SSH host from ~/.ssh/config - only need 'ssh' in -e parameter
+        return f"rsync -avz --exclude='build/' --exclude='devel/' --exclude='.git/' -e 'ssh'"
     else:
         # Direct SSH connection with key
         ssh_key = REMOTE_CONFIG.get("ssh_key", "~/.ssh/id_rsa_openmower")
         ssh_cmd = f"ssh -i {ssh_key} -o StrictHostKeyChecking=no"
-    
-    return f"rsync -avz --exclude='build/' --exclude='devel/' --exclude='.git/' -e '{ssh_cmd}'"
+        return f"rsync -avz --exclude='build/' --exclude='devel/' --exclude='.git/' -e '{ssh_cmd}'"
 
 # ============================================================================
 # PROJECT-SPECIFIC DETECTION
@@ -207,7 +224,8 @@ def validate_config():
     return errors
 
 if __name__ == "__main__":
-    # Test configuration
+    # Test configuration when run directly
+    REMOTE_CONFIG = load_config(verbose=True)
     errors = validate_config()
     if errors:
         print("❌ Configuration errors:")
@@ -217,8 +235,3 @@ if __name__ == "__main__":
         print("✅ Configuration is valid")
         
     print(f"\nProject Root: {get_project_root()}")
-    print(f"VS Code Dir: {get_vscode_dir()}")
-    print(f"Remote Host: {REMOTE_CONFIG['host']}")
-    print(f"Detected Programs: {len(detect_project_binaries())}")
-    for prog in detect_project_binaries():
-        print(f"  - {prog['name']}")

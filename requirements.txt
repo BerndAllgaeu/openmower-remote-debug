@@ -1,0 +1,9 @@
+# OpenMower Remote Debug Tools - Python Requirements
+# 
+# Currently, all scripts use only Python standard library modules.
+# This file is prepared for future extensions that might require external packages.
+
+# Uncomment if needed in the future:
+# psutil>=5.8.0          # System and process utilities
+# paramiko>=2.7.0        # SSH2 protocol library
+# pexpect>=4.8.0         # Controlling interactive programs

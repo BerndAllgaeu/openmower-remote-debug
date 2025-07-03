@@ -11,7 +11,7 @@ import sys
 
 # Config importieren
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import REMOTE_CONFIG, get_project_root, get_vscode_dir, get_ros_environment, get_ssh_command, get_rsync_command, detect_project_binaries, get_debug_scripts_dir
+from config import REMOTE_CONFIG, get_project_root, get_vscode_dir, get_ros_environment, get_ssh_command, get_ssh_full_command, get_rsync_command, detect_project_binaries, get_debug_scripts_dir
 
 def get_ssh_pipe_args():
     """Erstellt SSH pipe args für VS Code Remote Debug."""
@@ -120,8 +120,16 @@ def generate_launch_json():
 
 def generate_tasks_json():
     """Generiert die komplette tasks.json."""
-    ssh_base = get_ssh_command()
-    rsync_base = get_rsync_command()
+    ssh_full_cmd = get_ssh_full_command()
+    rsync_cmd = get_rsync_command()
+    
+    # Determine the correct rsync target
+    if "ssh_host" in REMOTE_CONFIG and REMOTE_CONFIG["ssh_host"]:
+        # When using SSH host, rsync should use the host name
+        rsync_target = f"{REMOTE_CONFIG['ssh_host']}:{REMOTE_CONFIG['workspace']}/"
+    else:
+        # Direct connection
+        rsync_target = f"{REMOTE_CONFIG['user']}@{REMOTE_CONFIG['host']}:{REMOTE_CONFIG['workspace']}/"
     
     return {
         "version": "2.0.0",
@@ -143,14 +151,28 @@ def generate_tasks_json():
             {
                 "label": "Sync Source to Pi",
                 "type": "shell",
-                "command": f"{rsync_base} ${{workspaceFolder}}/ {REMOTE_CONFIG['user']}@{REMOTE_CONFIG['host']}:{REMOTE_CONFIG['workspace']}/",
+                "command": f"{rsync_cmd} ${{workspaceFolder}}/ {rsync_target}",
+                "group": "build",
+                "options": {"cwd": "${workspaceFolder}"}
+            },
+            {
+                "label": "Sync + Setup Submodules on Pi",
+                "type": "shell",
+                "command": f"{rsync_cmd} ${{workspaceFolder}}/ {rsync_target} && {ssh_full_cmd} 'cd {REMOTE_CONFIG['workspace']} && git submodule update --init --recursive'",
                 "group": "build",
                 "options": {"cwd": "${workspaceFolder}"}
             },
             {
                 "label": "Remote Build on Pi",
                 "type": "shell",
-                "command": f"{ssh_base} 'cd {REMOTE_CONFIG['workspace']} && source /opt/ros/noetic/setup.bash && catkin_make'",
+                "command": f"{ssh_full_cmd} 'cd {REMOTE_CONFIG['workspace']} && source /opt/ros/noetic/setup.bash && catkin_make'",
+                "group": "build",
+                "dependsOn": "Sync + Setup Submodules on Pi"
+            },
+            {
+                "label": "Quick Remote Build on Pi",
+                "type": "shell",
+                "command": f"{ssh_full_cmd} 'cd {REMOTE_CONFIG['workspace']} && source /opt/ros/noetic/setup.bash && catkin_make'",
                 "group": "build",
                 "dependsOn": "Sync Source to Pi"
             },
@@ -165,14 +187,14 @@ def generate_tasks_json():
             {
                 "label": "Start ROS Master on Pi",
                 "type": "shell",
-                "command": f"{ssh_base} 'export ROS_MASTER_URI=http://{REMOTE_CONFIG['host']}:11311 && export ROS_IP={REMOTE_CONFIG['host']} && roscore'",
+                "command": f"{ssh_full_cmd} 'export ROS_MASTER_URI=http://{REMOTE_CONFIG['host']}:11311 && export ROS_IP={REMOTE_CONFIG['host']} && roscore'",
                 "group": "test",
                 "isBackground": True
             },
             {
                 "label": "Launch OpenMower on Pi",
                 "type": "shell",
-                "command": f"{ssh_base} 'cd {REMOTE_CONFIG['workspace']} && source devel/setup.bash && source ~/mower_config.sh && export ROS_MASTER_URI=http://{REMOTE_CONFIG['host']}:11311 && export ROS_IP={REMOTE_CONFIG['host']} && roslaunch open_mower open_mower.launch'",
+                "command": f"{ssh_full_cmd} 'cd {REMOTE_CONFIG['workspace']} && source devel/setup.bash && source ~/mower_config.sh && export ROS_MASTER_URI=http://{REMOTE_CONFIG['host']}:11311 && export ROS_IP={REMOTE_CONFIG['host']} && roslaunch open_mower open_mower.launch'",
                 "group": "test",
                 "isBackground": True
             },
@@ -185,7 +207,7 @@ def generate_tasks_json():
             {
                 "label": "Install Dependencies on Pi",
                 "type": "shell",
-                "command": f"{ssh_base} 'cd {REMOTE_CONFIG['workspace']} && source /opt/ros/noetic/setup.bash && rosdep update && rosdep install --from-paths src --ignore-src --default-yes'",
+                "command": f"{ssh_full_cmd} 'cd {REMOTE_CONFIG['workspace']} && source /opt/ros/noetic/setup.bash && rosdep update && rosdep install --from-paths src --ignore-src --default-yes'",
                 "group": "build"
             },
             {
