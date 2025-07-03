@@ -45,7 +45,7 @@ Bearbeiten Sie `.debug/config.py` für Ihre spezifische Hardware:
 
 ```python
 REMOTE_CONFIG = {
-    "host": "192.168.99.168",        # IP Ihres Raspberry Pi
+    "host": "192.168.1.100",        # IP Ihres Raspberry Pi
     "user": "ubuntu",                # SSH Username
     "password": "YourPassword",      # SSH Password (besser: SSH-Keys verwenden)
     "workspace": "/home/ubuntu/open_mower_ros"

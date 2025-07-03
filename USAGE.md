@@ -43,8 +43,8 @@ Bearbeiten Sie `.debug/config.py` für jedes Projekt:
 ```python
 REMOTE_CONFIG = {
     # Unterschiedliche Pi für verschiedene Projekte
-    "host": "192.168.99.168",           # Pi #1 für Projekt A
-    # "host": "192.168.99.169",         # Pi #2 für Projekt B
+    "host": "192.168.1.100",           # Pi #1 für Projekt A
+    # "host": "192.168.1.101",         # Pi #2 für Projekt B
     
     "user": "ubuntu",
     "password": "YourPassword",
@@ -107,7 +107,7 @@ Viele OpenMower-Community-Forks haben verschiedene Package-Namen oder zusätzlic
 1. **SSH-Keys verwenden**: Sicherer als Passwörter
    ```bash
    ssh-keygen -t rsa
-   ssh-copy-id ubuntu@192.168.99.168
+   ssh-copy-id ubuntu@192.168.1.100
    # Dann Passwort aus config.py entfernen
    ```
 
