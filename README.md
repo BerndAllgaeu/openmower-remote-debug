@@ -1,27 +1,32 @@
 # OpenMower Remote Debug Setup
 
-Dieses Repository enthält eine portable Remote-Debugging-Konfiguration für OpenMower-Projekte. Es kann als Git-Submodule in verschiedene OpenMower-Repositories eingebunden werden.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Security](https://img.shields.io/badge/Security-SSH%20Keys-green.svg)](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
+
+Ein portables, sicheres Remote-Debugging-Setup für OpenMower-Projekte. Kann als Git-Submodule in verschiedene OpenMower-Repositories eingebunden werden.
 
 ## 🎯 Features
 
-- ✅ Zentrale Konfigurationsverwaltung
-- ✅ Automatische VS Code Debug/Tasks-Generierung  
-- ✅ Portabel zwischen verschiedenen Branches/Forks
-- ✅ SSH-basiertes Remote-Debugging
-- ✅ Einfache Anpassung der Remote-Parameter
+- ✅ **SSH-Key Authentifizierung** - Keine Passwörter im Code
+- ✅ **Zentrale Konfigurationsverwaltung** - Eine Datei für alle Einstellungen  
+- ✅ **Automatische VS Code Debug/Tasks-Generierung** - Plug & Play
+- ✅ **Portabel zwischen Branches/Forks** - Funktioniert überall
+- ✅ **Sichere Git-History** - Keine sensiblen Daten in Commits
+- ✅ **Cross-platform Support** - Linux, macOS, Windows
 
 ## 🚀 Schnellstart
 
-### Als Git Submodule hinzufügen
+### 1. Als Git Submodule hinzufügen
 
 ```bash
 # Im Root-Verzeichnis Ihres OpenMower-Projekts
-git submodule add https://github.com/YOUR-USERNAME/openmower-remote-debug.git .debug
+git submodule add https://github.com/YOUR-USERNAME/openmower-remote-debug.git devel/debug-tools
 
-# Konfiguration generieren (erstellt automatisch devel/debug/ Skripte)
-.debug/setup.sh
+# Setup ausführen
+devel/debug-tools/setup.sh
 
 # VS Code öffnen und F5 für Remote-Debugging drücken
+code .
 ```
 
 ### Manuelle Installation
