@@ -1,0 +1,21 @@
+# OpenMower Remote Debug Setup Repository
+
+# Temporäre Dateien
+tmp/
+*.log
+*.tmp
+
+# IDE Dateien
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS Dateien
+.DS_Store
+Thumbs.db
