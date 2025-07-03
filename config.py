@@ -2,22 +2,22 @@
 """
 OpenMower Remote Debug Configuration
 
-Zentrale Konfigurationsdatei für Remote-Debugging Setup.
-Diese Datei wird von allen Scripts verwendet.
+Central configuration file for remote debugging setup.
+This file is used by all scripts.
 
 Setup:
-1. Kopiere config_local.py.template nach config_local.py
-2. Passe config_local.py an deine Umgebung an
-3. config_local.py wird automatisch von Git ignoriert
+1. Copy config_local.py.template to config_local.py
+2. Adapt config_local.py to your environment
+3. config_local.py is automatically ignored by Git
 """
 
 import os
 
 # ============================================================================
-# PROJEKT-SPEZIFISCHE KONFIGURATION (im Git)
+# PROJECT-SPECIFIC CONFIGURATION (tracked in Git)
 # ============================================================================
 
-# Debug Programme (korrekte Binary-Pfade aus devel/lib/)
+# Debug Programs (correct binary paths from devel/lib/)
 DEBUG_PROGRAMS = [
     {"name": "mower_logic", "path": "mower_logic/mower_logic"},
     {"name": "mower_comms_v2", "path": "mower_comms_v2/mower_comms_v2"},
@@ -31,101 +31,101 @@ DEBUG_PROGRAMS = [
     {"name": "slic3r_coverage_planner", "path": "slic3r_coverage_planner/slic3r_coverage_planner"},
     {"name": "driver_gps_node", "path": "xbot_driver_gps/driver_gps_node"},
     {"name": "xesc_driver_node", "path": "xesc_driver/xesc_driver_node"},
-    # open_mower ist ein Launch-Package, kein Binary - entfernt
+    # open_mower is a launch package, not a binary - excluded
 ]
 
-# Packages ohne ausführbare Binaries (nur Launch-Files, etc.)
+# Packages without executable binaries (only launch files, etc.)
 EXCLUDED_PACKAGES = ["open_mower", "mower_msgs", "mower_utils", "mower_map"]
 
 # ============================================================================
-# DEFAULT-KONFIGURATION (Fallback wenn config_local.py fehlt)
+# DEFAULT CONFIGURATION (fallback when config_local.py is missing)
 # ============================================================================
 
 DEFAULT_CONFIG = {
-    # Raspberry Pi Konfiguration
-    "host": "192.168.1.100",                    # IP-Adresse des Pi
-    "user": "ubuntu",                            # SSH-Benutzername
-    "ssh_key": "~/.ssh/id_rsa_openmower",        # SSH-Key Pfad
-    "ssh_host": "openmower",                     # SSH Host aus ~/.ssh/config
-    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace-Pfad auf dem Pi
+    # Raspberry Pi Configuration
+    "host": "192.168.1.100",                    # Pi IP address
+    "user": "ubuntu",                            # SSH username
+    "ssh_key": "~/.ssh/id_rsa_openmower",        # SSH key path
+    "ssh_host": "openmower",                     # SSH host from ~/.ssh/config
+    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace path on Pi
     
-    # ROS Konfiguration
+    # ROS Configuration
     "ros_master_uri": "http://192.168.1.100:11311",
     "ros_pi_ip": "192.168.1.100",
     "ros_dev_ip": "192.168.1.200",
 }
 
 # ============================================================================
-# KONFIGURATION LADEN UND MERGEN
+# CONFIGURATION LOADING AND MERGING
 # ============================================================================
 
 def load_config():
     """
-    Lädt die Konfiguration aus config_local.py falls vorhanden,
-    sonst werden die Default-Werte verwendet.
+    Loads configuration from config_local.py if available,
+    otherwise uses default values.
     """
     config = DEFAULT_CONFIG.copy()
     
     try:
-        # Versuche lokale Konfiguration zu importieren
+        # Try to import local configuration
         from config_local import LOCAL_CONFIG
         config.update(LOCAL_CONFIG)
-        print("✅ Lokale Konfiguration aus config_local.py geladen")
+        print("✅ Local configuration loaded from config_local.py")
     except ImportError:
-        print("⚠️  config_local.py nicht gefunden - verwende Default-Werte")
-        print("   Tipp: cp config_local.py.template config_local.py")
+        print("⚠️  config_local.py not found - using default values")
+        print("   Tip: cp config_local.py.template config_local.py")
     except Exception as e:
-        print(f"❌ Fehler beim Laden von config_local.py: {e}")
-        print("   Verwende Default-Werte")
+        print(f"❌ Error loading config_local.py: {e}")
+        print("   Using default values")
     
-    # Debug-Programme hinzufügen
+    # Add debug programs
     config["debug_programs"] = DEBUG_PROGRAMS
     
     return config
 
-# Globale Konfiguration laden
+# Load global configuration
 REMOTE_CONFIG = load_config()
 
 # ============================================================================
-# AUTOMATISCHE ERKENNUNG - Normalerweise nicht ändern
+# AUTOMATIC DETECTION - Usually no need to change
 # ============================================================================
 
 def get_project_root():
-    """Ermittelt das Root-Verzeichnis des OpenMower-Projekts."""
+    """Determines the root directory of the OpenMower project."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    # Gehe nach oben bis wir src/ oder CMakeLists.txt finden
+    # Go up until we find src/ or CMakeLists.txt
     while current_dir != "/":
         if (os.path.exists(os.path.join(current_dir, "src")) and 
             os.path.exists(os.path.join(current_dir, "CMakeLists.txt"))):
             return current_dir
         current_dir = os.path.dirname(current_dir)
     
-    # Fallback: Wenn wir in devel/debug-tools sind, gehe zwei Ebenen hoch
+    # Fallback: If we're in devel/debug-tools, go two levels up
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if script_dir.endswith("devel/debug-tools"):
         return os.path.dirname(os.path.dirname(script_dir))
     
-    # Fallback: Parent-Verzeichnis vom debug-tools-Ordner
+    # Fallback: Parent directory of debug-tools folder
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_vscode_dir():
-    """Ermittelt das .vscode-Verzeichnis."""
+    """Determines the .vscode directory."""
     return os.path.join(get_project_root(), ".vscode")
 
 def get_debug_scripts_dir():
-    """Ermittelt das Verzeichnis für Debug-Skripte (im devel/-Ordner)."""
+    """Determines directory for debug scripts (in devel/ folder)."""
     debug_dir = os.path.join(get_project_root(), "devel", "debug")
     os.makedirs(debug_dir, exist_ok=True)
     return debug_dir
 
 def get_temp_dir():
-    """Ermittelt das temporäre Verzeichnis für Debug-Dateien."""
+    """Determines temporary directory for debug files."""
     temp_dir = os.path.join(get_project_root(), "devel", "tmp")
     os.makedirs(temp_dir, exist_ok=True)
     return temp_dir
 
 def get_ros_environment():
-    """Ermittelt ROS-Umgebungsvariablen."""
+    """Determines ROS environment variables."""
     return {
         "ROS_MASTER_URI": REMOTE_CONFIG["ros_master_uri"],
         "ROS_IP": REMOTE_CONFIG["ros_pi_ip"],
@@ -136,33 +136,33 @@ def get_ros_environment():
     }
 
 def get_ssh_command():
-    """Erstellt SSH-Basis-Kommando mit SSH-Key."""
+    """Creates SSH base command with SSH key."""
     if "ssh_host" in REMOTE_CONFIG and REMOTE_CONFIG["ssh_host"]:
-        # Verwende SSH Host aus ~/.ssh/config
+        # Use SSH host from ~/.ssh/config
         return f"ssh {REMOTE_CONFIG['ssh_host']}"
     else:
-        # Direkte SSH-Verbindung mit Key
+        # Direct SSH connection with key
         ssh_key = REMOTE_CONFIG.get("ssh_key", "~/.ssh/id_rsa_openmower")
         return f"ssh -i {ssh_key} -o StrictHostKeyChecking=no {REMOTE_CONFIG['user']}@{REMOTE_CONFIG['host']}"
 
 def get_rsync_command():
-    """Erstellt rsync-Basis-Kommando mit SSH-Key."""
+    """Creates rsync base command with SSH key."""
     if "ssh_host" in REMOTE_CONFIG and REMOTE_CONFIG["ssh_host"]:
-        # Verwende SSH Host aus ~/.ssh/config
+        # Use SSH host from ~/.ssh/config
         ssh_cmd = f"ssh {REMOTE_CONFIG['ssh_host']}"
     else:
-        # Direkte SSH-Verbindung mit Key
+        # Direct SSH connection with key
         ssh_key = REMOTE_CONFIG.get("ssh_key", "~/.ssh/id_rsa_openmower")
         ssh_cmd = f"ssh -i {ssh_key} -o StrictHostKeyChecking=no"
     
     return f"rsync -avz --exclude='build/' --exclude='devel/' --exclude='.git/' -e '{ssh_cmd}'"
 
 # ============================================================================
-# PROJEKT-SPEZIFISCHE ERKENNUNG
+# PROJECT-SPECIFIC DETECTION
 # ============================================================================
 
 def detect_project_binaries():
-    """Erkennt verfügbare Binaries im Projekt automatisch."""
+    """Detects available binaries in the project automatically."""
     project_root = get_project_root()
     src_dir = os.path.join(project_root, "src")
     
@@ -172,11 +172,11 @@ def detect_project_binaries():
         for item in os.listdir(src_dir):
             item_path = os.path.join(src_dir, item)
             if os.path.isdir(item_path) and not item.startswith('.') and item not in EXCLUDED_PACKAGES:
-                # Prüfe ob es ein ROS-Package ist (CMakeLists.txt + package.xml)
+                # Check if it's a ROS package (CMakeLists.txt + package.xml)
                 if (os.path.exists(os.path.join(item_path, "CMakeLists.txt")) and
                     os.path.exists(os.path.join(item_path, "package.xml"))):
                     
-                    # Füge Standard-Binary hinzu wenn nicht in config
+                    # Add standard binary if not in config
                     if not any(p["name"] == item for p in REMOTE_CONFIG["debug_programs"]):
                         detected_programs.append({
                             "name": item,
@@ -186,39 +186,39 @@ def detect_project_binaries():
     return REMOTE_CONFIG["debug_programs"] + detected_programs
 
 # ============================================================================
-# VALIDIERUNG
+# VALIDATION
 # ============================================================================
 
 def validate_config():
-    """Validiert die Konfiguration."""
+    """Validates the configuration."""
     errors = []
     
-    # Pflichtfelder prüfen
+    # Check required fields
     required_fields = ["host", "user", "workspace"]
     for field in required_fields:
         if not REMOTE_CONFIG.get(field):
-            errors.append(f"REMOTE_CONFIG['{field}'] ist erforderlich")
+            errors.append(f"REMOTE_CONFIG['{field}'] is required")
     
-    # IP-Format grob prüfen
+    # Check IP format roughly
     host = REMOTE_CONFIG.get("host", "")
     if host and not (host.count(".") == 3 or ":" in host):
-        errors.append(f"Host '{host}' scheint keine gültige IP/Hostname zu sein")
+        errors.append(f"Host '{host}' doesn't seem to be a valid IP/hostname")
     
     return errors
 
 if __name__ == "__main__":
-    # Konfiguration testen
+    # Test configuration
     errors = validate_config()
     if errors:
-        print("❌ Konfigurationsfehler:")
+        print("❌ Configuration errors:")
         for error in errors:
             print(f"  - {error}")
     else:
-        print("✅ Konfiguration ist gültig")
+        print("✅ Configuration is valid")
         
-    print(f"\nProjekt-Root: {get_project_root()}")
+    print(f"\nProject Root: {get_project_root()}")
     print(f"VS Code Dir: {get_vscode_dir()}")
     print(f"Remote Host: {REMOTE_CONFIG['host']}")
-    print(f"Erkannte Programme: {len(detect_project_binaries())}")
+    print(f"Detected Programs: {len(detect_project_binaries())}")
     for prog in detect_project_binaries():
         print(f"  - {prog['name']}")

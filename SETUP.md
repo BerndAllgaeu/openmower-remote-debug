@@ -1,54 +1,54 @@
-# Setup-Anleitung für lokale Konfiguration
+# Setup Guide for Local Configuration
 
-Das OpenMower Remote Debug Setup nutzt jetzt ein Template-System für lokale Konfigurationen.
+The OpenMower Remote Debug Setup now uses a template-based configuration system for local settings.
 
-## Erste Einrichtung
+## Initial Setup
 
-1. **Template kopieren:**
+1. **Copy template:**
    ```bash
    cd devel/debug-tools
    cp config_local.py.template config_local.py
    ```
 
-2. **Lokale Einstellungen anpassen:**
+2. **Edit local settings:**
    ```bash
    nano config_local.py
    ```
    
-   Passe folgende Werte an deine Umgebung an:
-   - `host`: IP-Adresse deines Raspberry Pi
-   - `ros_master_uri`: ROS Master URI mit deiner Pi-IP
-   - `ros_pi_ip`: Pi IP für ROS-Kommunikation
-   - `ros_dev_ip`: IP deines Entwicklungsrechners
+   Adapt the following values to your environment:
+   - `host`: IP address of your Raspberry Pi
+   - `ros_master_uri`: ROS Master URI with your Pi's IP
+   - `ros_pi_ip`: Pi IP for ROS communication
+   - `ros_dev_ip`: IP of your development machine
 
-3. **SSH-Setup durchführen:**
-   Siehe `SSH-SETUP.md` für detaillierte Anweisungen
+3. **Setup SSH:**
+   See `SSH-SETUP.md` for detailed instructions
 
-4. **VS Code Konfigurationen generieren:**
+4. **Generate VS Code configurations:**
    ```bash
    ./generate-vscode.sh
    ```
 
-## Struktur
+## Structure
 
 ```
 devel/debug-tools/
-├── config.py                    # Haupt-Konfiguration (im Git)
-├── config_local.py.template     # Template für lokale Einstellungen (im Git)  
-├── config_local.py              # Deine lokalen Einstellungen (git-ignored)
-├── generate-vscode.py           # VS Code Generator
+├── config.py                    # Main configuration (in Git)
+├── config_local.py.template     # Template for local settings (in Git)  
+├── config_local.py              # Your local settings (git-ignored)
+├── generate-vscode.py           # VS Code generator
 └── ...
 ```
 
-## Vorteile
+## Benefits
 
-✅ **Git-sauber**: Keine lokalen IPs in der Git-History
-✅ **Team-freundlich**: Jeder kann eigene `config_local.py` haben  
-✅ **Einfache Commits**: Keine IP-Bereinigung nötig
-✅ **Fallback**: Funktioniert auch ohne `config_local.py`
+✅ **Git-clean**: No local IPs in Git history
+✅ **Team-friendly**: Each developer can have their own `config_local.py`
+✅ **Easy commits**: No IP sanitization needed
+✅ **Fallback**: Works even without `config_local.py`
 
-## Fehlerbehebung
+## Troubleshooting
 
-- **"config_local.py nicht gefunden"**: Führe Schritt 1 aus
-- **"SSH-Verbindung fehlgeschlagen"**: Prüfe SSH-Setup (siehe SSH-SETUP.md)
-- **"Binary nicht gefunden"**: Führe `catkin_make` auf dem Pi aus
+- **"config_local.py not found"**: Execute step 1
+- **"SSH connection failed"**: Check SSH setup (see SSH-SETUP.md)
+- **"Binary not found"**: Run `catkin_make` on the Pi

@@ -3,129 +3,175 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security](https://img.shields.io/badge/Security-SSH%20Keys-green.svg)](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
 
-Ein portables, sicheres Remote-Debugging-Setup für OpenMower-Projekte. Kann als Git-Submodule in verschiedene OpenMower-Repositories eingebunden werden.
+A portable, secure remote debugging setup for OpenMower projects. Can be integrated as a Git submodule into various OpenMower repositories.
 
 ## 🎯 Features
 
-- ✅ **SSH-Key Authentifizierung** - Keine Passwörter im Code
-- ✅ **Zentrale Konfigurationsverwaltung** - Eine Datei für alle Einstellungen  
-- ✅ **Automatische VS Code Debug/Tasks-Generierung** - Plug & Play
-- ✅ **Portabel zwischen Branches/Forks** - Funktioniert überall
-- ✅ **Sichere Git-History** - Keine sensiblen Daten in Commits
+- ✅ **SSH Key Authentication** - No passwords in code
+- ✅ **Template-based Configuration** - Local settings separated from Git
+- ✅ **Automatic VS Code Debug/Tasks Generation** - Plug & Play
+- ✅ **Portable across Branches/Forks** - Works everywhere
+- ✅ **Clean Git History** - No sensitive data in commits
 - ✅ **Cross-platform Support** - Linux, macOS, Windows
+- ✅ **Comprehensive Binary Detection** - All OpenMower programs supported
 
-## 🚀 Schnellstart
+## 🚀 Quick Start
 
-### 1. Als Git Submodule hinzufügen
+### Method 1: As Git Submodule (Recommended)
 
 ```bash
-# Im Root-Verzeichnis Ihres OpenMower-Projekts
-git submodule add https://github.com/YOUR-USERNAME/openmower-remote-debug.git devel/debug-tools
+# In your OpenMower project root directory
+git submodule add https://github.com/BerndAllgaeu/openmower-remote-debug.git devel/debug-tools
 
-# Setup ausführen
-devel/debug-tools/setup.sh
+# Setup local configuration
+cd devel/debug-tools
+cp config_local.py.template config_local.py
+nano config_local.py  # Edit with your Pi's IP and settings
 
-# VS Code öffnen und F5 für Remote-Debugging drücken
+# Generate VS Code configurations
+./generate-vscode.sh
+
+# Open VS Code and press F5 for remote debugging
 code .
 ```
 
-### Manuelle Installation
+### Method 2: Manual Installation
 
 ```bash
-# Repository klonen
-git clone https://github.com/YOUR-USERNAME/openmower-remote-debug.git .debug
+# Clone repository
+git clone https://github.com/BerndAllgaeu/openmower-remote-debug.git devel/debug-tools
 
-# Setup ausführen
-.debug/setup.sh
+# Setup local configuration
+cd devel/debug-tools
+cp config_local.py.template config_local.py
+nano config_local.py  # Edit with your network settings
 ```
 
-## ⚙️ Konfiguration
+## ⚙️ Configuration
 
-Bearbeiten Sie `.debug/config.py` für Ihre spezifische Hardware:
+The setup uses a template-based configuration system:
+
+### Files Structure
+```
+devel/debug-tools/
+├── config.py                    # Main logic + project settings (Git tracked)
+├── config_local.py.template     # Template for local settings (Git tracked)
+├── config_local.py              # Your local network settings (Git ignored)
+├── SETUP.md                     # Setup instructions
+└── SSH-SETUP.md                 # SSH configuration guide
+```
+
+### Local Configuration
+
+Edit `config_local.py` with your specific network settings:
 
 ```python
-REMOTE_CONFIG = {
-    "host": "192.168.1.100",        # IP Ihres Raspberry Pi
-    "user": "ubuntu",                # SSH Username
-    "password": "YourPassword",      # SSH Password (besser: SSH-Keys verwenden)
-    "workspace": "/home/ubuntu/open_mower_ros"
+LOCAL_CONFIG = {
+    # Raspberry Pi Connection
+    "host": "192.168.1.100",                    # Your Pi's IP address
+    "user": "ubuntu",                            # SSH username
+    "ssh_key": "~/.ssh/id_rsa_openmower",        # SSH key path
+    "ssh_host": "openmower",                     # SSH host from ~/.ssh/config
+    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace path on Pi
+    
+    # ROS Network Configuration
+    "ros_master_uri": "http://192.168.1.100:11311",  # ROS Master URI
+    "ros_pi_ip": "192.168.1.100",                     # Pi IP for ROS
+    "ros_dev_ip": "192.168.1.200",                    # Development machine IP
 }
 ```
 
-## 📋 Verfügbare Commands
+## � Available Debug Programs
+
+After setup, the following debug configurations are available:
+
+### Core Programs
+- **mower_logic** - Main mower logic
+- **mower_comms_v1/v2** - Hardware communication
+- **mower_map_service** - Map management
+- **monitoring** - System monitoring
+
+### Simulation & Planning
+- **mower_simulation** - Mower simulation
+- **slic3r_coverage_planner** - Path planning
+
+### XBot Framework
+- **xbot_positioning** - GPS positioning
+- **xbot_monitoring** - System monitoring
+- **xbot_remote** - Remote control
+
+### Hardware Drivers
+- **driver_gps_node** - GPS driver
+- **xesc_driver_node** - ESC driver
+
+## 📋 Commands
 
 ```bash
-.debug/setup.sh                    # Erstinstallation
-.debug/update-config.sh            # Konfiguration aktualisieren
-.debug/generate-vscode.sh          # VS Code Konfigurationen neu generieren
-.debug/test-connection.sh          # Verbindung zum Pi testen
+./generate-vscode.sh            # Generate VS Code configurations
+./test-connection.sh            # Test connection to Pi
+python3 config.py               # Validate configuration
 ```
 
-## 🐛 Debug-Konfigurationen
+## 🔐 SSH Setup
 
-Nach dem Setup stehen folgende Debug-Konfigurationen zur Verfügung:
+See [SSH-SETUP.md](SSH-SETUP.md) for detailed SSH key configuration.
 
-- **Remote Debug - mower_logic**: Hauptlogik des Mähers
-- **Remote Debug - mower_comms_v2**: Hardware-Kommunikation
-- **Remote Debug - mower_map_service**: Kartenverwaltung
-- **Local Debug - Build and Debug**: Lokales Debugging
+Quick SSH setup:
+```bash
+# Generate SSH key
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_openmower
 
-## 🔧 Anpassung an verschiedene Projekte
+# Copy to Pi
+ssh-copy-id -i ~/.ssh/id_rsa_openmower.pub ubuntu@YOUR_PI_IP
 
-Das Setup erkennt automatisch:
-- Verschiedene OpenMower-Forks
-- Branch-spezifische Konfigurationen
-- Projekt-spezifische Binaries
-
-## 📁 Verzeichnisstruktur
-
-```
-.debug/
-├── config.py              # Zentrale Konfiguration
-├── setup.sh              # Erstinstallation
-├── update-config.sh       # Update-Script
-├── generate-vscode.sh     # VS Code Generator
-├── test-connection.sh     # Verbindungstest
-├── templates/             # Template-Dateien
-├── scripts/               # Quell-Skripte (werden nach devel/debug kopiert)
-│   ├── deploy.sh
-│   ├── tunnel.sh
-│   └── cleanup.sh
-└── USAGE.md               # Anwendungsanleitung
-
-devel/debug/               # Ausführbare Skripte (automatisch generiert, git-ignoriert)
-├── deploy.sh
-├── tunnel.sh
-└── cleanup.sh
+# Test connection
+ssh -i ~/.ssh/id_rsa_openmower ubuntu@YOUR_PI_IP
 ```
 
 ## 🔄 Updates
 
 ```bash
-# Submodule aktualisieren
-git submodule update --remote .debug
+# Update submodule
+git submodule update --remote devel/debug-tools
 
-# Konfiguration neu generieren
-.debug/update-config.sh
+# Regenerate configurations
+devel/debug-tools/generate-vscode.sh
 ```
 
 ## 🛠️ Troubleshooting
 
-### SSH-Verbindung testen
+### Connection Issues
 ```bash
-.debug/test-connection.sh
+./test-connection.sh           # Test SSH connection
 ```
 
-### Konfiguration zurücksetzen
+### Missing config_local.py
 ```bash
-.debug/setup.sh --reset
+cp config_local.py.template config_local.py
+nano config_local.py          # Edit with your settings
 ```
 
-### Debug-Logs aktivieren
+### Binary not found
 ```bash
-DEBUG=1 .debug/generate-vscode.sh
+# On your Pi
+cd /home/ubuntu/open_mower_ros
+source /opt/ros/noetic/setup.bash
+catkin_make
 ```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Test with multiple OpenMower projects
+4. Submit a pull request
 
 ## 📞 Support
 
-Bei Problemen öffnen Sie ein Issue oder prüfen Sie die [Wiki-Seite](https://github.com/YOUR-USERNAME/openmower-remote-debug/wiki).
+- Create an issue for bugs or feature requests
+- Check [SETUP.md](SETUP.md) for detailed setup instructions
+- See [SSH-SETUP.md](SSH-SETUP.md) for SSH configuration help
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.

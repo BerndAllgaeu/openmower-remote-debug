@@ -1,39 +1,39 @@
 #!/usr/bin/env python3
 """
-OpenMower Remote Debug - Lokale Konfiguration Template
+OpenMower Remote Debug - Local Configuration Template
 
-Kopiere diese Datei nach 'config_local.py' und passe die Werte an deine Umgebung an.
-Die config_local.py wird automatisch von .gitignore ausgeschlossen.
+Copy this file to 'config_local.py' and adapt the values to your environment.
+The config_local.py will be automatically excluded by .gitignore.
 
-Befehl: cp config_local.py.template config_local.py
+Command: cp config_local.py.template config_local.py
 """
 
 # ============================================================================
-# LOKALE VERBINDUNGSEINSTELLUNGEN - An deine Umgebung anpassen
+# LOCAL CONNECTION SETTINGS - Adapt to your environment
 # ============================================================================
 
 LOCAL_CONFIG = {
-    # Raspberry Pi Verbindung
-    "host": "192.168.1.100",                    # IP-Adresse des Pi
-    "user": "ubuntu",                            # SSH-Benutzername  
-    "ssh_key": "~/.ssh/id_rsa_openmower",        # Pfad zum SSH-Key
-    "ssh_host": "openmower",                     # SSH Host aus ~/.ssh/config (optional)
-    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace-Pfad auf dem Pi
+    # Raspberry Pi Connection
+    "host": "192.168.1.100",                    # Pi IP address
+    "user": "ubuntu",                            # SSH username
+    "ssh_key": "~/.ssh/id_rsa_openmower",        # SSH key path
+    "ssh_host": "openmower",                     # SSH host from ~/.ssh/config (optional)
+    "workspace": "/home/ubuntu/open_mower_ros",  # Workspace path on Pi
     
-    # ROS Netzwerk-Konfiguration
+    # ROS Network Configuration
     "ros_master_uri": "http://192.168.1.100:11311",  # ROS Master URI
-    "ros_pi_ip": "192.168.1.100",                     # Pi IP für ROS
-    "ros_dev_ip": "192.168.1.200",                    # Entwicklungsrechner IP für ROS
+    "ros_pi_ip": "192.168.1.100",                     # Pi IP for ROS
+    "ros_dev_ip": "192.168.1.200",                    # Development machine IP for ROS
 }
 
 # ============================================================================
-# HINWEISE
+# NOTES
 # ============================================================================
 """
-SSH-Setup erforderlich:
-1. SSH-Keys generieren: ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_openmower
-2. Public Key auf Pi kopieren: ssh-copy-id -i ~/.ssh/id_rsa_openmower.pub ubuntu@192.168.1.100
-3. SSH-Config erstellen (optional): ~/.ssh/config
+SSH Setup Required:
+1. Generate SSH keys: ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_openmower
+2. Copy public key to Pi: ssh-copy-id -i ~/.ssh/id_rsa_openmower.pub ubuntu@192.168.1.100
+3. Create SSH config (optional): ~/.ssh/config
 
-Siehe SSH-SETUP.md für detaillierte Anweisungen.
+See SSH-SETUP.md for detailed instructions.
 """
