@@ -25,14 +25,21 @@ REMOTE_CONFIG = {
     "ros_pi_ip": "192.168.1.100",
     "ros_dev_ip": "192.168.1.200",
     
-    # Debug Programme (nur existierende Binaries)
+    # Debug Programme (korrekte Binary-Pfade aus devel/lib/)
     "debug_programs": [
         {"name": "mower_logic", "path": "mower_logic/mower_logic"},
         {"name": "mower_comms_v2", "path": "mower_comms_v2/mower_comms_v2"},
         {"name": "mower_map_service", "path": "mower_map/mower_map_service"},
         {"name": "monitoring", "path": "mower_logic/monitoring"},
         {"name": "mower_comms_v1", "path": "mower_comms_v1/mower_comms_v1"},
-        # open_mower ist ein Launch-Package, kein Binary - nicht als Debug-Ziel
+        {"name": "mower_simulation", "path": "mower_simulation/mower_simulation"},
+        {"name": "xbot_positioning", "path": "xbot_positioning/xbot_positioning"},
+        {"name": "xbot_monitoring", "path": "xbot_monitoring/xbot_monitoring"},
+        {"name": "xbot_remote", "path": "xbot_remote/xbot_remote"},
+        {"name": "slic3r_coverage_planner", "path": "slic3r_coverage_planner/slic3r_coverage_planner"},
+        {"name": "driver_gps_node", "path": "xbot_driver_gps/driver_gps_node"},
+        {"name": "xesc_driver_node", "path": "xesc_driver/xesc_driver_node"},
+        # open_mower ist ein Launch-Package, kein Binary - entfernt
     ]
 }
 
@@ -116,8 +123,8 @@ def detect_project_binaries():
     project_root = get_project_root()
     src_dir = os.path.join(project_root, "src")
     
-    # Packages ohne ausführbare Binaries (nur Launch-Files, Messages, etc.)
-    excluded_packages = ["open_mower", "mower_msgs", "mower_utils"]
+    # Packages ohne ausführbare Binaries (nur Launch-Files, etc.)
+    excluded_packages = ["open_mower", "mower_msgs", "mower_utils", "mower_map"]
     
     detected_programs = []
     
