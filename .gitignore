@@ -19,3 +19,4 @@ __pycache__/
 # OS Dateien
 .DS_Store
 Thumbs.db
+config_local.py
