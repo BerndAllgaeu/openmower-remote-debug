@@ -21,8 +21,26 @@ The OpenMower Remote Debug Setup now uses a template-based configuration system 
    - `ros_pi_ip`: Pi IP for ROS communication
    - `ros_dev_ip`: IP of your development machine
 
-3. **Setup SSH:**
-   See `SSH-SETUP.md` for detailed instructions
+3. **Setup SSH Keys:**
+   ```bash
+   # Generate SSH key for OpenMower (if not exists)
+   ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa_openmower -N "" -C "openmower-debug@$(hostname)"
+   
+   # Add SSH config entry
+   cat >> ~/.ssh/config << EOF
+   Host openmower
+       HostName YOUR_PI_IP_HERE
+       User ubuntu
+       IdentityFile ~/.ssh/id_rsa_openmower
+       StrictHostKeyChecking no
+   EOF
+   
+   # Copy SSH key to Pi
+   ssh-copy-id -i ~/.ssh/id_rsa_openmower.pub ubuntu@YOUR_PI_IP_HERE
+   
+   # Test connection
+   ssh openmower "echo 'SSH connection successful!'"
+   ```
 
 4. **Generate VS Code configurations:**
    ```bash
@@ -49,6 +67,6 @@ devel/debug-tools/
 
 ## Troubleshooting
 
-- **"config_local.py not found"**: Execute step 1
-- **"SSH connection failed"**: Check SSH setup (see SSH-SETUP.md)
+- **"config_local.py not found"**: Execute step 1 (copy template)
+- **"SSH connection failed"**: Check SSH key setup and verify Pi IP address
 - **"Binary not found"**: Run `catkin_make` on the Pi
